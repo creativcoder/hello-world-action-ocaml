@@ -1,4 +1,4 @@
-name: Main workflow
+name: Bin prot checker e2e test
 
 on:
   - pull_request
@@ -10,38 +10,54 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
+          # - macos-latest
           - ubuntu-latest
-          - windows-latest
+          # - windows-latest
         ocaml-version:
-          - 4.11.0
-          - 4.10.1
-          - 4.09.1
+          # - 4.11.0
+          # - 4.10.1
+          # - 4.09.1
           - 4.08.1
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout mina repository
         uses: actions/checkout@v2
+        with:
+          repository: 'MinaProtocol/mina'
+          ref: 'bin-prot-checker'
+      - name: test
+        run: ls
 
       - name: Use OCaml ${{ matrix.ocaml-version }}
         uses: avsm/setup-ocaml@v1
         with:
           ocaml-version: ${{ matrix.ocaml-version }}
 
-      - run: opam pin add hello.dev . --no-action
+      # - run: opam exec -- dune build
+      - run: sudo apt-get install -y libffi-dev libgmp-dev libjemalloc-dev libpq-dev libsodium-dev librocksdb-dev
+      - run: opam install dune
+      - run: eval $(opam env)
+      - run: echo `pwd`
+      # - run: opam exec -- dune build
+      - run: scripts/pin-external-packages.sh
+      - run: scripts/setup-opam.sh
+      - run: rustup install 1.45.2
+      - run: rustup override set 1.45.2
 
-      - run: opam depext hello --yes --with-doc --with-test
+      - run: opam exec -- dune build src/app/bin_prot_checker/bin_prot_checker.exe
 
-      - run: opam install . --deps-only --with-doc --with-test
+      # - run: opam depext hello --yes --with-doc --with-test
 
-      - run: opam exec -- dune build
+      # - run: opam install . --deps-only --with-doc --with-test
 
-      - run: opam exec -- dune runtest
+      # - run: opam exec -- dune build
 
-      - name: Upload the build artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.os }}-${{ matrix.ocaml-version }}-world.exe
-          path: _build/default/world.exe
+      # - run: opam exec -- dune runtest
+
+      # - name: Upload the build artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: ${{ matrix.os }}-${{ matrix.ocaml-version }}-world.exe
+      #     path: _build/default/world.exe
