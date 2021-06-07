@@ -1,4 +1,4 @@
-name: Main workflow
+name: Bin prot checker e2e test
 
 on:
   - pull_request
@@ -22,26 +22,31 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout mina repository
         uses: actions/checkout@v2
-
-      - name: Use OCaml ${{ matrix.ocaml-version }}
-        uses: avsm/setup-ocaml@v1
         with:
-          ocaml-version: ${{ matrix.ocaml-version }}
+          repository: 'https://github.com/MinaProtocol/mina'
+          ref: 'bin-prot-checker'
+      - name: test
+        run: ls
 
-      - run: opam pin add hello.dev . --no-action
+      # - name: Use OCaml ${{ matrix.ocaml-version }}
+      #   uses: avsm/setup-ocaml@v1
+      #   with:
+      #     ocaml-version: ${{ matrix.ocaml-version }}
 
-      - run: opam depext hello --yes --with-doc --with-test
+      # - run: opam pin add hello.dev . --no-action
 
-      - run: opam install . --deps-only --with-doc --with-test
+      # - run: opam depext hello --yes --with-doc --with-test
 
-      - run: opam exec -- dune build
+      # - run: opam install . --deps-only --with-doc --with-test
 
-      - run: opam exec -- dune runtest
+      # - run: opam exec -- dune build
 
-      - name: Upload the build artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.os }}-${{ matrix.ocaml-version }}-world.exe
-          path: _build/default/world.exe
+      # - run: opam exec -- dune runtest
+
+      # - name: Upload the build artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: ${{ matrix.os }}-${{ matrix.ocaml-version }}-world.exe
+      #     path: _build/default/world.exe
